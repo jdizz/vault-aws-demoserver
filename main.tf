@@ -1,5 +1,7 @@
 provider "aws" {
-  region = var.aws_region
+  region = "${var.aws_region}"
+  shared_credentials_file = "$HOME/.aws/credentials"
+  profile = "tf_user"
 }
 
 resource "random_pet" "env" {
@@ -8,18 +10,18 @@ resource "random_pet" "env" {
 }
 
 resource "aws_vpc" "vpc" {
-  cidr_block           = var.vpc_cidr
+  cidr_block           = "var.vpc_cidr"
   enable_dns_hostnames = true
 
   tags = {
     Name  = "${var.namespace}-${random_pet.env.id}"
-    Owner = "cdunlap"
+    Owner = "jdavis"
     TTL   = "48"
   }
 }
 
 resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = "aws_vpc.vpc.id"
 
   tags = {
     Name = "${var.namespace}-${random_pet.env.id}"
@@ -27,9 +29,9 @@ resource "aws_internet_gateway" "gw" {
 }
 
 resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.vpc_cidr
-  availability_zone       = var.aws_zone
+  vpc_id                  = "aws_vpc.vpc.id"
+  cidr_block              = "var.vpc_cidr"
+  availability_zone       = "var.aws_zone"
   map_public_ip_on_launch = true
 
   tags = {
@@ -38,11 +40,11 @@ resource "aws_subnet" "public_subnet" {
 }
 
 resource "aws_route_table" "route" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = "aws_vpc.vpc.id"
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
+    gateway_id = "aws_internet_gateway.gw.id"
   }
 
   tags = {
@@ -51,6 +53,6 @@ resource "aws_route_table" "route" {
 }
 
 resource "aws_route_table_association" "route" {
-  subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = aws_route_table.route.id
+  subnet_id      = "aws_subnet.public_subnet.id"
+  route_table_id = "aws_route_table.route.id"
 }
