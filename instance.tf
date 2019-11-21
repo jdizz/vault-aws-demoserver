@@ -23,48 +23,49 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "vault" {
-  ami           = data.aws_ami.ubuntu.id
+  ami           = "data.aws_ami.ubuntu.id"
   instance_type = "t2.medium"
-  count         = 1
-  subnet_id     = aws_subnet.public_subnet.id
-  key_name      = "cdunlap-aws"
+  count         = "1"
+  subnet_id     = "aws_subnet.public_subnet.id"
+  key_name      = "jdavis-aws"
 
   security_groups = [
-    aws_security_group.vault.id,
+    "aws_security_group.vault.id"
   ]
 
-  associate_public_ip_address = true
-  ebs_optimized               = false
-  iam_instance_profile        = aws_iam_instance_profile.vault-kms-unseal.id
+  associate_public_ip_address = "true"
+  ebs_optimized               = "false"
+  iam_instance_profile        = "aws_iam_instance_profile.vault-kms-unseal.id"
 
   tags = {
     Name = "${var.namespace}-${random_pet.env.id}"
   }
 
-  user_data = data.template_file.vault.rendered
+  user_data = "data.template_file.vault.rendered"
 }
 
 data "template_file" "vault" {
+  
   template = file("userdata.tpl")
 
   vars = {
-    kms_key    = aws_kms_key.vault.id
-    vault_url  = var.vault_url
-    aws_region = var.aws_region
-    vault_db_address = aws_db_instance.vault.address
-    db_address = aws_db_instance.proddb.address
-    proddb_username = var.proddb_username
-    proddb_password = var.proddb_password
-    vaultdb_username = var.vaultdb_username
-    vaultdb_password = var.vaultdb_password
+    kms_key    = "aws_kms_key.vault.id"
+    vault_url  = "var.vault_url"
+    aws_region = "var.aws_region"
+    vault_db_address = "aws_db_instance.vault.address"
+    db_address = "aws_db_instance.proddb.address"
+    proddb_username = "var.proddb_username"
+    proddb_password = "var.proddb_password"
+    vaultdb_username = "var.vaultdb_username"
+    vaultdb_password = "var.vaultdb_password"
   }
 }
 
 data "template_file" "format_ssh" {
-  template = "connect to host with following command: ssh ubuntu@$${admin} -i private.key"
+  template = "Connect to host with following command: ssh ubuntu@$${admin} -i private.key"
 
   vars = {
-    admin = aws_instance.vault[0].public_ip
+    admin = "aws_instance.vault[0].public_ip"
   }
 }
 
@@ -73,7 +74,7 @@ data "template_file" "format_ssh" {
 resource "aws_security_group" "vault" {
   name        = "${var.namespace}-${random_pet.env.id}"
   description = "vault access"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = "aws_vpc.vpc.id"
 
   tags = {
     Name = "${var.namespace}-${random_pet.env.id}"
